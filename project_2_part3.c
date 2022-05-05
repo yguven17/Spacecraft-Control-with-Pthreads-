@@ -402,7 +402,7 @@ void* PrintQueue(Queue* q) {
 void* WriteLog(char* log){
     pthread_mutex_lock(&logFileMutex);
 
-    FILE* fp = fopen("log.txt", "a");
+    FILE* fp = fopen("log3.txt", "a");
     fprintf(fp, "%s", log);
     fclose(fp);
 

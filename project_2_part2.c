@@ -122,7 +122,7 @@ int main(int argc,char **argv) {
 
     startTime4Simulation = time(NULL);
 
-    FILE *logFile = fopen("log_part2.txt", "w");
+    FILE *logFile = fopen("log2.txt", "w");
     fprintf(logFile, "EventID, Status, Request Time, End Time, Turnaround Time, Pad\n");
     fclose(logFile);
 
@@ -386,7 +386,7 @@ void* PrintQueue(Queue* q) {
 void* WriteLog(char* log){
     pthread_mutex_lock(&logFileMutex);
 
-    FILE* fp = fopen("log.txt", "a");
+    FILE* fp = fopen("log2.txt", "a");
     fprintf(fp, "%s", log);
     fclose(fp);
 
