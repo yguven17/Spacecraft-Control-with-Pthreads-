@@ -16,13 +16,13 @@ time_t startTime = 0;
 int emergencyFrequency = 40;
 
 
-void* LandingJob(void *arg); 
+void* LandingJob(void *arg);
 void* LaunchJob(void *arg);
-void* EmergencyJob(void *arg); 
-void* AssemblyJob(void *arg); 
-void* ControlTower(void *arg); 
+void* EmergencyJob(void *arg);
+void* AssemblyJob(void *arg);
+void* ControlTower(void *arg);
 
-// new voids 
+// new voids
 void* PadA(void *arg);
 void* PadB(void *arg);
 void* WriteLog(char* log);
@@ -66,30 +66,37 @@ int pthread_sleep (int seconds)
     struct timeval tp;
     //When to expire is an absolute time, so get the current time and add it to our delay time
     gettimeofday(&tp, NULL);
-    timetoexpire.tv_sec = tp.tv_sec + seconds; timetoexpire.tv_nsec = tp.tv_usec * 1000;
-    
+    timetoexpire.tv_sec = tp.tv_sec + seconds;
+    timetoexpire.tv_nsec = tp.tv_usec * 1000;
+
     pthread_mutex_lock (&mutex);
     int res =  pthread_cond_timedwait(&conditionvar, &mutex, &timetoexpire);
     pthread_mutex_unlock (&mutex);
     pthread_mutex_destroy(&mutex);
     pthread_cond_destroy(&conditionvar);
-    
+
     //Upon successful completion, a value of zero shall be returned
     return res;
 }
 
-int main(int argc,char **argv){
+int main(int argc,char **argv) {
     // -p (float) => sets p
     // -t (int) => simulation time in seconds
     // -s (int) => change the random seed
-    for(int i=1; i<argc; i++){
-        if(!strcmp(argv[i], "-p")) {p = atof(argv[++i]);}
-        else if(!strcmp(argv[i], "-t")) {simulationTime = atoi(argv[++i]);}
-        else if(!strcmp(argv[i], "-s"))  {seed = atoi(argv[++i]);}
+    for(int i=1; i<argc; i++) {
+        if(!strcmp(argv[i], "-p")) {
+            p = atof(argv[++i]);
+        }
+        else if(!strcmp(argv[i], "-t")) {
+            simulationTime = atoi(argv[++i]);
+        }
+        else if(!strcmp(argv[i], "-s"))  {
+            seed = atoi(argv[++i]);
+        }
     }
-    
+
     srand(seed); // feed the seed
-    
+
     /* Queue usage example
         Queue *myQ = ConstructQueue(1000);
         Job j;
@@ -165,11 +172,11 @@ int main(int argc,char **argv){
 }
 
 // the function that creates plane threads for landing
-void* LandingJob(void *arg){
+void* LandingJob(void *arg) {
 
-    while(time(NULL) < deadline){
+    while(time(NULL) < deadline) {
         pthread_sleep(2);
-        if(rand()%100 < 100-p*100){
+        if(rand()%100 < 100-p*100) {
             Job j;
             j.ID = rand()%1000;
             j.type = LANDING_JOB;
@@ -186,11 +193,11 @@ void* LandingJob(void *arg){
 }
 
 // the function that creates plane threads for departure
-void* LaunchJob(void *arg){
+void* LaunchJob(void *arg) {
 
-    while(time(NULL) < deadline){
+    while(time(NULL) < deadline) {
         pthread_sleep(2);
-        if(rand()%100 < (p/2)*100){
+        if(rand()%100 < (p/2)*100) {
             Job j;
             j.ID = rand()%1000;
             j.type = LAUNCH_JOB;
@@ -207,16 +214,16 @@ void* LaunchJob(void *arg){
 }
 
 // the function that creates plane threads for emergency landing
-void* EmergencyJob(void *arg){
+void* EmergencyJob(void *arg) {
 
 }
 
 // the function that creates plane threads for emergency landing
-void* AssemblyJob(void *arg){
+void* AssemblyJob(void *arg) {
 
-    while(time(NULL) < deadline){
+    while(time(NULL) < deadline) {
         pthread_sleep(2);
-        if(rand()%100 < (p/2)*100){
+        if(rand()%100 < (p/2)*100) {
             Job j;
             j.ID = rand()%1000;
             j.type = ASSEMBLY_JOB;
@@ -233,18 +240,18 @@ void* AssemblyJob(void *arg){
 }
 
 // the function that controls the air traffic
-void* ControlTower(void *arg){
+void* ControlTower(void *arg) {
 
-    while(time(NULL) < deadline){
+    while(time(NULL) < deadline) {
 
         pthread_mutex_lock(&landingQueueMutex);
-        while(!isEmpty(landingQueue)){
+        while(!isEmpty(landingQueue)) {
             pthread_mutex_lock(&padAQueueMutex);
             pthread_mutex_lock(&padBQueueMutex);
-            if(padAQueue->durationTime <= padBQueue->durationTime){
+            if(padAQueue->durationTime <= padBQueue->durationTime) {
                 Enqueue(padAQueue, Dequeue(landingQueue));
             }
-            else{
+            else {
                 Enqueue(padBQueue, Dequeue(landingQueue));
             }
 
@@ -276,10 +283,10 @@ void* ControlTower(void *arg){
 
 }
 
-void* PadA(void *arg){
-    while(time(NULL) < deadline){
+void* PadA(void *arg) {
+    while(time(NULL) < deadline) {
         pthread_mutex_lock(&padAQueueMutex);
-        if(isEmpty(padAQueue)){
+        if(isEmpty(padAQueue)) {
             pthread_mutex_unlock(&padAQueueMutex);
             pthread_sleep(2);
         }
@@ -289,7 +296,7 @@ void* PadA(void *arg){
             pthread_mutex_unlock(&padAQueueMutex);
             pthread_sleep(padAQueue->head->data.durationTime);
 
-            pthread_mutex_lock(&padAQueueMutex);    
+            pthread_mutex_lock(&padAQueueMutex);
             Job j = Dequeue(padAQueue);
             pthread_mutex_unlock(&padAQueueMutex);
 
@@ -302,10 +309,10 @@ void* PadA(void *arg){
     return NULL;
 }
 
-void* PadB(void *arg){
-    while(time(NULL) < deadline){
+void* PadB(void *arg) {
+    while(time(NULL) < deadline) {
         pthread_mutex_lock(&padBQueueMutex);
-        if(isEmpty(padBQueue)){
+        if(isEmpty(padBQueue)) {
             pthread_mutex_unlock(&padBQueueMutex);
             pthread_sleep(2);
         }
@@ -328,13 +335,13 @@ void* PadB(void *arg){
 }
 
 
-void* PrintQueue(Queue* q){
-    if(isEmpty(q)){
+void* PrintQueue(Queue* q) {
+    if(isEmpty(q)) {
         printf("empty\n");
     }
-    else{
+    else {
         NODE* curr = q->head;
-        while(curr != NULL){
+        while(curr != NULL) {
             printf("%d ", curr->data.ID);
             curr = curr->prev;
         }
