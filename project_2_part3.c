@@ -128,7 +128,7 @@ int main(int argc,char **argv) {
 
     startTime4Simulation = time(NULL);
 
-    FILE *logFile = fopen("log.txt", "w");
+    FILE *logFile = fopen("log3.txt", "w");
     fprintf(logFile, "EventID, Status, Request Time, End Time, Turnaround Time, Pad\n");
     fclose(logFile);
 
