@@ -45,7 +45,7 @@ Queue *ConstructQueue(int limit) {
     queue->size = 0;
     queue->head = NULL;
     queue->tail = NULL;
-    queue->duraitonTime = 0;
+    queue->durationTime = 0;
 
     return queue;
 }
@@ -95,7 +95,7 @@ Job Dequeue(Queue *pQueue) {
     item = pQueue->head;
     pQueue->head = (pQueue->head)->prev;
     pQueue->size--;
-    pQueue->durationTime -= j.durationTime;
+    pQueue->durationTime -= item->data.durationTime;
     ret = item->data;
     free(item);
     return ret;

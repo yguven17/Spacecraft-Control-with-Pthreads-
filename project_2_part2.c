@@ -122,7 +122,7 @@ int main(int argc,char **argv) {
 
     startTime4Simulation = time(NULL);
 
-    FILE *logFile = fopen("log.txt", "w");
+    FILE *logFile = fopen("log_part2.txt", "w");
     fprintf(logFile, "EventID, Status, Request Time, End Time, Turnaround Time, Pad\n");
     fclose(logFile);
 
@@ -270,8 +270,17 @@ void* ControlTower(void *arg) {
 
     while(time(NULL) < deadline4job) {
 
-        pthread_mutex_lock(&landingQueueMutex);
-        while(!isEmpty(landingQueue)) {
+        pthread_mutex_lock(&launchQueueMutex);
+        pthread_mutex_lock(&assemblyQueueMutex);
+
+
+        if (assemblyQueue->size < 3 && launchQueue->size < 3)
+        {
+            pthread_mutex_unlock(&launchQueueMutex);
+            pthread_mutex_unlock(&assemblyQueueMutex);
+            pthread_mutex_lock(&landingQueueMutex);
+
+            while(!isEmpty(landingQueue)) {
             pthread_mutex_lock(&padAQueueMutex);
             pthread_mutex_lock(&padBQueueMutex);
             if(padAQueue->durationTime <= padBQueue->durationTime) {
@@ -283,28 +292,26 @@ void* ControlTower(void *arg) {
 
             pthread_mutex_unlock(&padAQueueMutex);
             pthread_mutex_unlock(&padBQueueMutex);
+            }
+
+            pthread_mutex_unlock(&landingQueueMutex);
+            pthread_mutex_lock(&padAQueueMutex);
+            pthread_mutex_lock(&launchQueueMutex);
+
+        }else{
+            pthread_mutex_lock(&padAQueueMutex);
+            pthread_mutex_lock(&padBQueueMutex);
+            pthread_mutex_unlock(&launchQueueMutex);
+            pthread_mutex_unlock(&assemblyQueueMutex);
+            pthread_mutex_lock(&landingQueueMutex);
+
+            pthread_mutex_unlock(&padAQueueMutex);
+            pthread_mutex_unlock(&padBQueueMutex);
+            pthread_mutex_unlock(&landingQueueMutex);
+
         }
-
-        pthread_mutex_unlock(&landingQueueMutex);
-        pthread_mutex_lock(&padAQueueMutex);
-        pthread_mutex_lock(&launchQueueMutex);
-
-        if (isEmpty(padAQueue) && !isEmpty(launchQueue)) {
-            Enqueue(padAQueue, Dequeue(launchQueue));
-        }
-
-        pthread_mutex_unlock(&padAQueueMutex);
-        pthread_mutex_unlock(&launchQueueMutex);
-        pthread_mutex_lock(&padBQueueMutex);
-        pthread_mutex_lock(&assemblyQueueMutex);
-
-        if (isEmpty(padBQueue) && !isEmpty(assemblyQueue)) {
-            Enqueue(padBQueue, Dequeue(assemblyQueue));
-        }
-
-        pthread_mutex_unlock(&padBQueueMutex);
-        pthread_mutex_unlock(&assemblyQueueMutex);
     }
+
     return NULL;
 
 }
